@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Perspective Editor — Fluent 2 Mockup</title>
+<style>
+  /* Fluent 2 tokens (subset) */
+  :root {
+    --colorNeutralBackground1: #ffffff;
+    --colorNeutralBackground2: #fafafa;
+    --colorNeutralBackground3: #f5f5f5;
+    --colorNeutralBackground1Hover: #f5f5f5;
+    --colorNeutralBackground1Selected: #ebebeb;
+    --colorNeutralStroke1: #d1d1d1;
+    --colorNeutralStroke2: #e0e0e0;
+    --colorNeutralForeground1: #242424;
+    --colorNeutralForeground2: #424242;
+    --colorNeutralForeground3: #616161;
+    --colorNeutralForegroundDisabled: #bdbdbd;
+    --colorBrandBackground: #0f6cbd;
+    --colorBrandBackgroundHover: #115ea3;
+    --colorBrandBackgroundPressed: #0c3b5e;
+    --colorBrandForeground1: #0f6cbd;
+    --colorBrandStroke1: #0f6cbd;
+    --colorNeutralShadowAmbient: rgba(0,0,0,0.12);
+    --colorNeutralShadowKey: rgba(0,0,0,0.14);
+    --shadow16: 0 8px 16px var(--colorNeutralShadowKey), 0 0 2px var(--colorNeutralShadowAmbient);
+    --shadow64: 0 32px 64px var(--colorNeutralShadowKey), 0 0 8px var(--colorNeutralShadowAmbient);
+    --borderRadiusSmall: 2px;
+    --borderRadiusMedium: 4px;
+    --borderRadiusLarge: 6px;
+    --fontFamilyBase: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: linear-gradient(135deg, #edf3fa 0%, #e5ecf5 100%);
+    font-family: var(--fontFamilyBase);
+    color: var(--colorNeutralForeground1);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  /* Page shell */
+  .page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* Dialog overlay (kept always-open for mockup) */
+  .dialog-surface {
+    width: min(1120px, 100%);
+    max-height: calc(100vh - 48px);
+    background: var(--colorNeutralBackground1);
+    border-radius: 8px;
+    box-shadow: var(--shadow64);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--colorNeutralStroke2);
+  }
+
+  .dialog-header {
+    padding: 20px 24px 12px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .dialog-title {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .dialog-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--colorNeutralForeground3);
+  }
+  .dialog-close {
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--borderRadiusMedium);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--colorNeutralForeground2);
+  }
+  .dialog-close:hover { background: var(--colorNeutralBackground1Hover); }
+
+  /* Toolbar */
+  .toolbar {
+    padding: 8px 24px 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--colorNeutralStroke2);
+  }
+  .search {
+    flex: 0 1 320px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--colorNeutralStroke1);
+    border-bottom: 1px solid var(--colorNeutralForeground3);
+    border-radius: var(--borderRadiusMedium);
+    background: var(--colorNeutralBackground1);
+  }
+  .search:focus-within {
+    border-bottom: 2px solid var(--colorBrandStroke1);
+    padding-bottom: 0;
+  }
+  .search input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font: inherit;
+    background: transparent;
+    color: var(--colorNeutralForeground1);
+  }
+  .search svg { color: var(--colorNeutralForeground3); }
+
+  .toolbar-spacer { flex: 1; }
+
+  .btn {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--borderRadiusMedium);
+    border: 1px solid var(--colorNeutralStroke1);
+    background: var(--colorNeutralBackground1);
+    color: var(--colorNeutralForeground1);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { background: var(--colorNeutralBackground1Hover); }
+  .btn:active { background: var(--colorNeutralBackground1Selected); }
+  .btn.primary {
+    background: var(--colorBrandBackground);
+    border-color: var(--colorBrandBackground);
+    color: #fff;
+  }
+  .btn.primary:hover { background: var(--colorBrandBackgroundHover); border-color: var(--colorBrandBackgroundHover); }
+  .btn.primary:active { background: var(--colorBrandBackgroundPressed); border-color: var(--colorBrandBackgroundPressed); }
+  .btn.subtle {
+    border-color: transparent;
+    background: transparent;
+    color: var(--colorNeutralForeground2);
+  }
+  .btn.subtle:hover { background: var(--colorNeutralBackground1Hover); }
+  .btn .icon { width: 16px; height: 16px; display: inline-flex; }
+
+  /* Grid area */
+  .grid-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+    background: var(--colorNeutralBackground1);
+  }
+  table.grid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  table.grid thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--colorNeutralBackground2);
+    border-bottom: 1px solid var(--colorNeutralStroke1);
+    text-align: left;
+    font-weight: 600;
+    color: var(--colorNeutralForeground2);
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+  table.grid thead th.sticky-left {
+    left: 0;
+    z-index: 4;
+    background: var(--colorNeutralBackground2);
+    border-right: 1px solid var(--colorNeutralStroke2);
+    min-width: 320px;
+  }
+  table.grid td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--colorNeutralStroke2);
+    vertical-align: middle;
+  }
+  table.grid td.sticky-left {
+    position: sticky;
+    left: 0;
+    background: var(--colorNeutralBackground1);
+    border-right: 1px solid var(--colorNeutralStroke2);
+    z-index: 1;
+  }
+  table.grid tbody tr:hover td { background: var(--colorNeutralBackground1Hover); }
+  table.grid tbody tr:hover td.sticky-left { background: var(--colorNeutralBackground1Hover); }
+
+  /* Tree cell */
+  .tree-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+  .tree-cell .indent { display: inline-block; width: 20px; }
+  .chevron {
+    width: 20px; height: 20px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--borderRadiusSmall);
+    cursor: pointer;
+    color: var(--colorNeutralForeground3);
+    transition: transform 0.15s ease;
+  }
+  .chevron:hover { background: var(--colorNeutralBackground1Selected); color: var(--colorNeutralForeground1); }
+  .chevron.expanded { transform: rotate(90deg); }
+  .chevron.leaf { visibility: hidden; }
+
+  .row-icon { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: var(--colorBrandForeground1); }
+  .row-icon.column { color: #8764b8; }
+  .row-icon.measure { color: #107c10; }
+  .row-icon.hierarchy { color: #ca5010; }
+
+  .row-label { font-weight: 500; }
+  .row-type {
+    margin-left: 6px;
+    font-size: 11px;
+    color: var(--colorNeutralForeground3);
+    font-weight: 400;
+  }
+
+  tr.row-table > td.sticky-left { background: var(--colorNeutralBackground3); }
+  tr.row-table:hover > td.sticky-left { background: var(--colorNeutralBackground1Selected); }
+  tr.row-table .row-label { font-weight: 600; }
+
+  tr.hidden-row { display: none; }
+
+  /* Perspective column header */
+  th.persp-col {
+    min-width: 160px;
+    text-align: center;
+  }
+  th.persp-col .persp-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  th.persp-col .persp-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 160px;
+  }
+  th.persp-col .persp-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+  }
+  th.persp-col .rename-input {
+    height: 24px;
+    border: 1px solid var(--colorNeutralStroke1);
+    border-bottom: 2px solid var(--colorBrandStroke1);
+    border-radius: var(--borderRadiusSmall);
+    padding: 0 6px;
+    font: inherit;
+    font-weight: 600;
+    width: 130px;
+    outline: none;
+  }
+  th.persp-col .persp-count {
+    font-size: 11px;
+    color: var(--colorNeutralForeground3);
+    font-weight: 400;
+  }
+  th.persp-col .icon-btn {
+    width: 20px; height: 20px;
+    border-radius: var(--borderRadiusSmall);
+    border: none;
+    background: transparent;
+    color: var(--colorNeutralForeground3);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  th.persp-col .icon-btn:hover { background: var(--colorNeutralBackground1Selected); color: var(--colorNeutralForeground1); }
+  th.persp-col .icon-btn.danger:hover { color: #c50f1f; }
+
+  /* Add column */
+  th.add-col {
+    min-width: 220px;
+    background: var(--colorNeutralBackground2);
+  }
+  .add-persp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .add-persp input {
+    height: 28px;
+    border: 1px solid var(--colorNeutralStroke1);
+    border-bottom: 1px solid var(--colorNeutralForeground3);
+    border-radius: var(--borderRadiusMedium);
+    padding: 0 8px;
+    font: inherit;
+    outline: none;
+    width: 140px;
+    background: var(--colorNeutralBackground1);
+  }
+  .add-persp input:focus { border-bottom: 2px solid var(--colorBrandStroke1); padding-bottom: 0; }
+
+  .add-col-cell {
+    background: var(--colorNeutralBackground2);
+  }
+
+  /* Checkbox */
+  td.check-cell {
+    text-align: center;
+    padding: 4px;
+  }
+  .check-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+  .info-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    cursor: help;
+  }
+  .info-badge svg { display: block; }
+  .checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--colorNeutralForeground3);
+    border-radius: var(--borderRadiusSmall);
+    background: var(--colorNeutralBackground1);
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .checkbox:hover { border-color: var(--colorNeutralForeground1); }
+  .checkbox.checked {
+    background: var(--colorBrandBackground);
+    border-color: var(--colorBrandBackground);
+    color: #fff;
+  }
+  .checkbox.mixed {
+    background: var(--colorBrandBackground);
+    border-color: var(--colorBrandBackground);
+    color: #fff;
+  }
+  .checkbox svg { width: 12px; height: 12px; }
+  .checkbox:not(.checked):not(.mixed) svg { display: none; }
+
+  /* Footer */
+  .dialog-footer {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid var(--colorNeutralStroke2);
+    background: var(--colorNeutralBackground1);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    background: #dff6dd;
+    color: #0e700e;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .status-pill .dot { width: 6px; height: 6px; border-radius: 999px; background: #0e700e; }
+
+  /* Connection bar */
+  .conn-bar {
+    padding: 8px 24px 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8f9fb;
+    border-bottom: 1px solid var(--colorNeutralStroke2);
+  }
+  .conn-label { font-size: 12px; color: var(--colorNeutralForeground2); font-weight: 600; }
+  .conn-status {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--colorNeutralForeground3);
+  }
+  .conn-status.ok { color: #0e700e; font-weight: 600; }
+  .conn-status.err { color: #c50f1f; font-weight: 600; }
+  .conn-status.busy { color: var(--colorBrandForeground1); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="dialog-surface" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="dialog-header">
+      <div>
+        <h1 class="dialog-title" id="dlgTitle">Manage perspectives — Live</h1>
+        <p class="dialog-subtitle">Connect to a local Power BI Desktop instance and edit its perspectives.</p>
+      </div>
+      <button class="dialog-close" title="Close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="conn-bar">
+      <label class="conn-label">AS server</label>
+      <div class="search" style="flex:0 0 200px">
+        <input id="serverInput" type="text" placeholder="localhost:50030" value="localhost:50030" />
+      </div>
+      <label class="conn-label">Backend</label>
+      <div class="search" style="flex:0 0 220px">
+        <input id="backendInput" type="text" placeholder="http://localhost:8768" value="http://localhost:8768" />
+      </div>
+      <button class="btn primary" id="loadBtn">Load</button>
+      <span id="connStatus" class="conn-status">Not connected</span>
+    </div>
+
+    <div class="toolbar">
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input id="search" type="text" placeholder="Search items" />
+      </div>
+      <button class="btn subtle" id="expandAll" title="Expand all">
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        Expand all
+      </button>
+      <button class="btn subtle" id="collapseAll" title="Collapse all">
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        Collapse all
+      </button>
+      <div class="toolbar-spacer"></div>
+      <span class="status-pill"><span class="dot"></span>Unsaved changes</span>
+    </div>
+
+    <div class="grid-wrap">
+      <table class="grid" id="grid">
+        <thead>
+          <tr id="headerRow">
+            <th class="sticky-left">Model items</th>
+            <!-- Perspective columns injected here -->
+            <th class="add-col" id="addColHeader">
+              <div class="add-persp">
+                <input id="newPerspInput" type="text" placeholder="+ New perspective" aria-label="New perspective name" />
+                <button class="btn primary" id="addConfirmBtn" style="height:28px; padding:0 10px;">Add</button>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="gridBody">
+          <!-- rows injected -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dialog-footer">
+      <button class="btn subtle" id="cancelBtn">Cancel</button>
+      <button class="btn primary" id="applyBtn">Apply</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Model ----------
+  const REAL_MODEL = { tables: [] };
+  const model = {
+    tables: REAL_MODEL.tables,
+    perspectives: [],
+    membership: {},
+    wholeTable: {},
+    renaming: null,
+  };
+
+  function key(table, child) { return child ? `${table}/${child}` : table; }
+
+  // ---------- Icons ----------
+  const icons = {
+    table: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 6.5h12M2 10h12M6 6.5v6.5M10 6.5v6.5" stroke="currentColor" stroke-width="1.2"/></svg>`,
+    column: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="2.5" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="2.5" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>`,
+    measure: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 3h8l-3 5 3 5H4l3-5-3-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>`,
+    hierarchy: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3.5" r="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="4" cy="12.5" r="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="12.5" r="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3M8 8L4 11M8 8l4 3" stroke="currentColor" stroke-width="1.3"/></svg>`,
+    chevron: `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    check: `<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    dash: `<svg viewBox="0 0 16 16" fill="none"><path d="M4 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    edit: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L6 12l-3 1 1-3 7.5-7.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>`,
+    trash: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M6 4.5V3a1 1 0 011-1h2a1 1 0 011 1v1.5M4.5 4.5l.7 8.2A1 1 0 006.2 14h3.6a1 1 0 001-1.3l.7-8.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    info: `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" fill="#ffffff" stroke="#0f6cbd" stroke-width="1.4"/><circle cx="8" cy="5.25" r="0.9" fill="#0f6cbd"/><path d="M8 7.75v3.75" stroke="#0f6cbd" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+  };
+
+  // ---------- Rendering ----------
+  const gridBody = document.getElementById("gridBody");
+  const headerRow = document.getElementById("headerRow");
+  const addColHeader = document.getElementById("addColHeader");
+
+  function isChecked(persp, tableName, childName) {
+    return model.membership[persp.id]?.has(key(tableName, childName));
+  }
+  function setChecked(persp, tableName, childName, val) {
+    const s = model.membership[persp.id] || (model.membership[persp.id] = new Set());
+    const k = key(tableName, childName);
+    if (val) s.add(k); else s.delete(k);
+  }
+  function isWholeTable(persp, tableName) {
+    return model.wholeTable[persp.id]?.has(tableName);
+  }
+  function setWholeTable(persp, tableName, val) {
+    const s = model.wholeTable[persp.id] || (model.wholeTable[persp.id] = new Set());
+    if (val) s.add(tableName); else s.delete(tableName);
+  }
+
+  // Table-level state: whole / checked / mixed / unchecked
+  function tableState(persp, table) {
+    if (isWholeTable(persp, table.name)) return "whole";
+    const total = table.children.length;
+    let n = 0;
+    table.children.forEach(c => { if (isChecked(persp, table.name, c.name)) n++; });
+    if (n === 0) return "unchecked";
+    if (n === total) return "checked";
+    return "mixed";
+  }
+
+  function countInPerspective(persp) {
+    let n = 0;
+    model.tables.forEach(t => {
+      if (isWholeTable(persp, t.name)) { n += t.children.length; return; }
+      t.children.forEach(c => { if (isChecked(persp, t.name, c.name)) n++; });
+    });
+    return n;
+  }
+
+  function renderHeader() {
+    // Remove existing perspective columns (keep sticky-left and add-col)
+    [...headerRow.querySelectorAll("th.persp-col")].forEach(el => el.remove());
+    // Insert before addColHeader
+    model.perspectives.forEach(p => {
+      const th = document.createElement("th");
+      th.className = "persp-col";
+      th.dataset.pid = p.id;
+      const count = countInPerspective(p);
+      th.innerHTML = `
+        <div class="persp-head">
+          <div class="persp-name">
+            ${model.renaming === p.id
+              ? `<input class="rename-input" value="${escapeHtml(p.name)}" data-pid="${p.id}" />`
+              : `<span class="persp-name-text" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+                 <button class="icon-btn rename-btn" title="Rename" data-pid="${p.id}">${icons.edit}</button>
+                 <button class="icon-btn danger delete-btn" title="Delete perspective" data-pid="${p.id}">${icons.trash}</button>`
+            }
+          </div>
+          <div class="persp-count">${count} item${count === 1 ? "" : "s"}</div>
+        </div>`;
+      headerRow.insertBefore(th, addColHeader);
+    });
+  }
+
+  function renderBody(filter = "") {
+    gridBody.innerHTML = "";
+    const q = filter.trim().toLowerCase();
+    model.tables.forEach(table => {
+      const tableMatches = !q || table.name.toLowerCase().includes(q);
+      const matchingChildren = table.children.filter(c => !q || c.name.toLowerCase().includes(q));
+      const showTable = tableMatches || matchingChildren.length > 0;
+      if (!showTable) return;
+
+      // Table row
+      const tr = document.createElement("tr");
+      tr.className = "row-table";
+      tr.dataset.table = table.name;
+      const chevronCls = table.expanded ? "chevron expanded" : "chevron";
+      tr.innerHTML = `
+        <td class="sticky-left">
+          <div class="tree-cell">
+            <span class="${chevronCls}" data-toggle="${escapeAttr(table.name)}">${icons.chevron}</span>
+            <span class="row-icon">${icons.table}</span>
+            <span class="row-label">${escapeHtml(table.name)}</span>
+            <span class="row-type">Table</span>
+          </div>
+        </td>
+        ${model.perspectives.map(p => {
+          const st = tableState(p, table);
+          const isChecked = st === "checked" || st === "whole";
+          const isMixed = st === "mixed";
+          const showInfo = st === "whole";
+          const title = showInfo ? "Whole table included — objects added later will also be in this perspective" : "";
+          return `<td class="check-cell">
+            <div class="check-wrap">
+              <div class="checkbox ${isChecked ? "checked" : isMixed ? "mixed" : ""}"
+                   data-pid="${p.id}" data-table="${escapeAttr(table.name)}" role="checkbox"
+                   aria-checked="${st === "checked" || st === "whole" ? "true" : st === "mixed" ? "mixed" : "false"}">
+                ${isMixed ? icons.dash : icons.check}
+              </div>
+              ${showInfo ? `<span class="info-badge" title="${title}" aria-label="${title}">${icons.info}</span>` : ""}
+            </div>
+          </td>`;
+        }).join("")}
+        <td class="add-col-cell"></td>
+      `;
+      gridBody.appendChild(tr);
+
+      // Child rows
+      const childrenToShow = q ? (tableMatches ? table.children : matchingChildren) : table.children;
+      childrenToShow.forEach(child => {
+        const ctr = document.createElement("tr");
+        ctr.className = "row-child";
+        ctr.dataset.parent = table.name;
+        if (!table.expanded && !q) ctr.classList.add("hidden-row");
+        const iconCls = child.type;
+        const typeLabel = child.type === "column" ? "Column"
+                        : child.type === "measure" ? "Measure"
+                        : child.type === "hierarchy" ? "Hierarchy" : "";
+        ctr.innerHTML = `
+          <td class="sticky-left">
+            <div class="tree-cell">
+              <span class="indent"></span>
+              <span class="chevron leaf">${icons.chevron}</span>
+              <span class="row-icon ${iconCls}">${icons[child.type] || ""}</span>
+              <span class="row-label">${escapeHtml(child.name)}</span>
+              <span class="row-type">${escapeHtml(typeLabel)}</span>
+            </div>
+          </td>
+          ${model.perspectives.map(p => {
+            const checked = isWholeTable(p, table.name) || isChecked(p, table.name, child.name);
+            return `<td class="check-cell">
+              <div class="checkbox ${checked ? "checked" : ""}"
+                   data-pid="${p.id}" data-table="${escapeAttr(table.name)}" data-child="${escapeAttr(child.name)}"
+                   role="checkbox" aria-checked="${checked ? "true" : "false"}">
+                ${icons.check}
+              </div>
+            </td>`;
+          }).join("")}
+          <td class="add-col-cell"></td>
+        `;
+        gridBody.appendChild(ctr);
+      });
+    });
+  }
+
+  function render(filter = "") {
+    renderHeader();
+    renderBody(filter);
+  }
+
+  // ---------- Events ----------
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])); }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  document.getElementById("search").addEventListener("input", (e) => render(e.target.value));
+
+  document.getElementById("expandAll").addEventListener("click", () => {
+    model.tables.forEach(t => t.expanded = true);
+    render(document.getElementById("search").value);
+  });
+  document.getElementById("collapseAll").addEventListener("click", () => {
+    model.tables.forEach(t => t.expanded = false);
+    render(document.getElementById("search").value);
+  });
+
+  // Delegate clicks in grid
+  gridBody.addEventListener("click", (e) => {
+    // Chevron toggle
+    const chev = e.target.closest("[data-toggle]");
+    if (chev) {
+      const name = chev.getAttribute("data-toggle");
+      const t = model.tables.find(x => x.name === name);
+      if (t) { t.expanded = !t.expanded; render(document.getElementById("search").value); }
+      return;
+    }
+    // Checkbox
+    const cb = e.target.closest(".checkbox");
+    if (cb) {
+      const pid = cb.getAttribute("data-pid");
+      const tableName = cb.getAttribute("data-table");
+      const childName = cb.getAttribute("data-child");
+      const persp = model.perspectives.find(p => p.id === pid);
+      const table = model.tables.find(t => t.name === tableName);
+      if (!persp || !table) return;
+      if (childName) {
+        // If table is currently "whole", downgrade to explicit and start with all children checked
+        if (isWholeTable(persp, tableName)) {
+          setWholeTable(persp, tableName, false);
+          table.children.forEach(c => setChecked(persp, tableName, c.name, true));
+          setChecked(persp, tableName, childName, false); // toggle off the clicked one
+        } else {
+          const cur = isChecked(persp, tableName, childName);
+          setChecked(persp, tableName, childName, !cur);
+        }
+      } else {
+        // Table-level click cycles: (unchecked | mixed | checked-all-manual | whole) -> ...
+        const st = tableState(persp, table);
+        if (st === "whole") {
+          // Whole -> uncheck everything
+          setWholeTable(persp, tableName, false);
+          table.children.forEach(c => setChecked(persp, tableName, c.name, false));
+        } else if (st === "checked") {
+          // All manually checked -> promote to whole (adds the (i) so future objects auto-include)
+          setWholeTable(persp, tableName, true);
+          table.children.forEach(c => setChecked(persp, tableName, c.name, false));
+        } else {
+          // unchecked or mixed -> whole
+          setWholeTable(persp, tableName, true);
+          table.children.forEach(c => setChecked(persp, tableName, c.name, false));
+        }
+      }
+      render(document.getElementById("search").value);
+    }
+  });
+
+  // Header interactions (rename / delete)
+  headerRow.addEventListener("click", (e) => {
+    const rn = e.target.closest(".rename-btn");
+    if (rn) {
+      model.renaming = rn.getAttribute("data-pid");
+      render(document.getElementById("search").value);
+      const input = headerRow.querySelector(`.rename-input[data-pid="${model.renaming}"]`);
+      if (input) { input.focus(); input.select(); }
+      return;
+    }
+    const del = e.target.closest(".delete-btn");
+    if (del) {
+      const pid = del.getAttribute("data-pid");
+      const p = model.perspectives.find(x => x.id === pid);
+      if (p && confirm(`Delete perspective "${p.name}"?`)) {
+        model.perspectives = model.perspectives.filter(x => x.id !== pid);
+        delete model.membership[pid];
+        render(document.getElementById("search").value);
+      }
+    }
+  });
+
+  headerRow.addEventListener("keydown", (e) => {
+    if (!e.target.classList.contains("rename-input")) return;
+    if (e.key === "Enter") { commitRename(e.target); }
+    else if (e.key === "Escape") { model.renaming = null; render(document.getElementById("search").value); }
+  });
+  headerRow.addEventListener("focusout", (e) => {
+    if (e.target.classList.contains("rename-input")) commitRename(e.target);
+  });
+  function commitRename(input) {
+    const pid = input.getAttribute("data-pid");
+    const p = model.perspectives.find(x => x.id === pid);
+    const val = input.value.trim();
+    if (p && val) p.name = val;
+    model.renaming = null;
+    render(document.getElementById("search").value);
+  }
+
+  // Add perspective
+  const newInput = document.getElementById("newPerspInput");
+  document.getElementById("addConfirmBtn").addEventListener("click", addPerspective);
+  newInput.addEventListener("keydown", (e) => { if (e.key === "Enter") addPerspective(); });
+  function addPerspective() {
+    const name = newInput.value.trim();
+    if (!name) { newInput.focus(); return; }
+    const id = "p" + (Date.now().toString(36));
+    model.perspectives.push({ id, name });
+    model.membership[id] = new Set();
+    newInput.value = "";
+    render(document.getElementById("search").value);
+  }
+
+  // ---------- Live loading & saving ----------
+  const originalPerspectives = new Set(); // names that came from the server (for delete detection)
+
+  function setStatus(text, cls) {
+    const el = document.getElementById("connStatus");
+    el.textContent = text;
+    el.className = "conn-status" + (cls ? " " + cls : "");
+  }
+
+  function markDirty() { /* Apply is always enabled */ }
+
+  async function loadModel() {
+    const server = document.getElementById("serverInput").value.trim();
+    const backend = document.getElementById("backendInput").value.trim().replace(/\/$/, "");
+    const port = server.includes(":") ? server.split(":").pop() : server;
+    if (!port) { setStatus("Enter a server like localhost:50030", "err"); return; }
+    setStatus("Loading…", "busy");
+    try {
+      const res = await fetch(`${backend}/api/model?port=${encodeURIComponent(port)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Load failed");
+      model.tables = data.tables;
+      model.perspectives = data.perspectives.map(p => ({ id: p.id, name: p.name }));
+      model.membership = {};
+      model.wholeTable = {};
+      originalPerspectives.clear();
+      data.perspectives.forEach(p => {
+        originalPerspectives.add(p.name);
+        model.membership[p.id] = new Set(p.membership);
+        model.wholeTable[p.id] = new Set(p.wholeTables);
+      });
+      setStatus(`Loaded ${model.tables.length} tables, ${model.perspectives.length} perspectives (catalog ${data.catalog})`, "ok");
+      render();
+      markDirty();
+    } catch (e) {
+      console.error(e);
+      setStatus("Load failed: " + e.message, "err");
+    }
+  }
+
+  async function applyChanges() {
+    const server = document.getElementById("serverInput").value.trim();
+    const backend = document.getElementById("backendInput").value.trim().replace(/\/$/, "");
+    const port = server.includes(":") ? server.split(":").pop() : server;
+    if (!port) { setStatus("Enter a server first", "err"); return; }
+
+    // Build payload
+    const currentNames = new Set(model.perspectives.map(p => p.name));
+    const deletes = [...originalPerspectives].filter(n => !currentNames.has(n));
+
+    const perspectives = model.perspectives.map(p => {
+      const tables = [];
+      model.tables.forEach(t => {
+        const whole = model.wholeTable[p.id]?.has(t.name);
+        if (whole) {
+          tables.push({ name: t.name, wholeTable: true });
+          return;
+        }
+        const cols = [], meas = [], hier = [];
+        t.children.forEach(c => {
+          if (!model.membership[p.id]?.has(key(t.name, c.name))) return;
+          if (c.type === "column") cols.push(c.name);
+          else if (c.type === "measure") meas.push(c.name);
+          else if (c.type === "hierarchy") hier.push(c.name);
+        });
+        if (cols.length || meas.length || hier.length) {
+          tables.push({ name: t.name, wholeTable: false, columns: cols, measures: meas, hierarchies: hier });
+        }
+      });
+      return { name: p.name, tables };
+    });
+
+    setStatus("Applying…", "busy");
+    try {
+      const res = await fetch(`${backend}/api/perspectives?port=${encodeURIComponent(port)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ perspectives, deletes })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Apply failed");
+      setStatus("Applied ✓ — reloading", "ok");
+      await loadModel();
+    } catch (e) {
+      console.error(e);
+      setStatus("Apply failed: " + e.message, "err");
+    }
+  }
+
+  document.getElementById("loadBtn").addEventListener("click", loadModel);
+  document.getElementById("applyBtn").addEventListener("click", () => {
+    console.log("Apply clicked");
+    applyChanges();
+  });
+  document.getElementById("cancelBtn").addEventListener("click", () => loadModel());
+  document.getElementById("serverInput").addEventListener("keydown", (e) => { if (e.key === "Enter") loadModel(); });
+
+  // Initial render (empty until Load)
+  render();
+  setStatus("Enter port and click Load", null);
+</script>
+</body>
+</html>
+
